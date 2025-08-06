@@ -22,5 +22,3 @@ const baseMaps = {
 };
 
 L.control.layers(baseMaps).addTo(map);
-
-L.marker([47.2529, -122.4443]).addTo(map).bindPopup("Test").openPopup();
