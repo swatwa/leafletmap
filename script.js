@@ -1,3 +1,6 @@
+const urlParams = new URLSearchParams(window.location.search);
+const coords = urlParams.get("coords")?.split(",").map(Number);
+
 const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap contributors",
 });
@@ -10,10 +13,16 @@ const Imagery = L.tileLayer(
   }
 );
 
+// Default center
+let center = [47.2529, -122.4443];
+if (coords && coords.length === 2) {
+  center = coords;
+}
+
 const map = L.map("map", {
-  center: [47.2529, -122.4443],
-  zoom: 9,
-  layers: [Imagery], // default layer
+  center: center,
+  zoom: 13,
+  layers: [Imagery],
 });
 
 const baseMaps = {
@@ -22,3 +31,8 @@ const baseMaps = {
 };
 
 L.control.layers(baseMaps).addTo(map);
+
+// Drop a pin if coordinates are provided
+if (coords && coords.length === 2) {
+  L.marker(coords).addTo(map).bindPopup("You are here").openPopup();
+}
