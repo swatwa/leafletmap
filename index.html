@@ -19,9 +19,36 @@
         padding: 0;
         height: 100%;
       }
+
       #map {
         height: 100vh;
         width: 100%;
+      }
+
+      .button-container {
+        position: absolute;
+        bottom: 50px; /* Position the container at the vertical center */
+        left: 50%; /* Position the container at the horizontal center */
+        transform: translate(
+          -50%,
+          -50%
+        ); /* Adjust the container back by half its own width and height */
+        z-index: 1000;
+      }
+
+      button {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: #0078a8;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      button:hover {
+        background-color: #005f88;
       }
     </style>
     <meta charset="UTF-8" />
@@ -30,6 +57,11 @@
   </head>
   <body>
     <div id="map"></div>
+    <div class="button-container">
+      <button onclick="dropPinAtCurrentLocation()">
+        Drop Pin at Current Location
+      </button>
+    </div>
   </body>
 </html>
 <script src="script.js"></script>
