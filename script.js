@@ -68,15 +68,18 @@ function dropPinAtCurrentLocation() {
 
         const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
 
-        marker
-          .bindPopup(
-            `Latitude: ${lat}<br>Longitude: ${lng}<br><button onclick="deletePin(${marker._leaflet_id})">Delete</button>`
-          )
-          .openPopup(); // We'll open the popup immediately after adding the pin
+        // Create popup content with lat/lng and delete button
+        const popupContent = `
+          <b>Dropped Pin</b><br>
+          Latitude: ${lat.toFixed(6)}<br>
+          Longitude: ${lng.toFixed(6)}<br>
+          <button onclick="removeMarker(${marker._leaflet_id})">Delete</button>
+        `;
+
+        marker.bindPopup(popupContent).openPopup();
 
         userMarkers.push(marker);
 
-        // Send coordinates to parent iframe
         window.parent.postMessage({ lat, lng }, "*");
       },
       (error) => {
@@ -89,13 +92,10 @@ function dropPinAtCurrentLocation() {
   }
 }
 
-// Corrected delete function
-function deletePin(id) {
-  const markerToDelete = userMarkers.find(
-    (marker) => marker._leaflet_id === id
-  );
-  if (markerToDelete) {
-    map.removeLayer(markerToDelete);
-    userMarkers = userMarkers.filter((marker) => marker._leaflet_id !== id);
+function removeMarker(id) {
+  const marker = userMarkers.find((m) => m._leaflet_id === id);
+  if (marker) {
+    map.removeLayer(marker);
+    userMarkers = userMarkers.filter((m) => m._leaflet_id !== id);
   }
 }
