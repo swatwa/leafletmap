@@ -37,17 +37,32 @@ const baseMaps = {
 
 L.control.layers(baseMaps).addTo(map);
 
+// ADDED: Define a custom icon for dropped pins to control their size
+const customPinIcon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png", // Default Leaflet marker image
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconSize: [25, 41], // CUSTOMIZE THIS: [width, height] of the icon
+  iconAnchor: [12, 41], // CUSTOMIZE THIS: point of the icon which will correspond to marker's location
+  popupAnchor: [1, -34], // point from which the popup should open relative to the iconAnchor
+  shadowSize: [41, 41], // size of the shadow
+});
+
 // Drop a pin if initial coordinates are provided (original behavior, now correctly scoped)
 if (coords && coords.length === 2) {
   const initialLat = coords[0];
   const initialLng = coords[1];
-  const initialMarker = L.marker(coords).addTo(map);
+  // MODIFIED: Use the customPinIcon for the initial marker
+  const initialMarker = L.marker(coords, { icon: customPinIcon }).addTo(map);
 
   // Define popup content specifically for the initial pin
   const initialPopupContent = `
-    <b>Initial Pin</b><br>
-    Latitude: ${initialLat.toFixed(6)}<br>
-    Longitude: ${initialLng.toFixed(6)}
+    <div style="text-align: center; padding: 5px;">
+      <b>Initial Pin</b><br style="margin-bottom: 5px;">
+      Latitude: ${initialLat.toFixed(6)}<br>
+      Longitude: ${initialLng.toFixed(6)}
+    </div>
   `;
   initialMarker.bindPopup(initialPopupContent).openPopup();
 }
@@ -82,8 +97,8 @@ function startLiveLocationTracking() {
           // The circle's radius indicates the accuracy
           liveLocationMarker = L.circle(latLng, {
             radius: accuracy, // Use accuracy for the circle radius
-            color: "blue",
-            fillColor: "#0078A8",
+            color: "green", // MODIFIED: Changed outline color to green
+            fillColor: "#008000", // MODIFIED: Changed fill color to green
             fillOpacity: 0.5,
           }).addTo(map);
 
@@ -149,7 +164,7 @@ map.on("load", startLiveLocationTracking);
 // --- Existing functions for dropping a single pin manually (from your button) ---
 
 /**
- * Drops a single, draggable pin at the user's current location on button click.
+ * Drops a single, non-draggable, but deletable pin at the user's current location on button click.
  */
 function dropPinAtCurrentLocation() {
   if (navigator.geolocation) {
@@ -158,14 +173,23 @@ function dropPinAtCurrentLocation() {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        // MODIFIED: Use the customPinIcon for manually dropped markers
+        const marker = L.marker([lat, lng], {
+          draggable: false,
+          icon: customPinIcon,
+        }).addTo(map);
 
         // Create popup content with lat/lng and delete button (correctly scoped here)
+        // ADDED: Styling for spacing and centering
         const popupContent = `
-          <b>Dropped Pin</b><br>
-          Latitude: ${lat.toFixed(6)}<br>
-          Longitude: ${lng.toFixed(6)}<br>
-          <button onclick="removeMarker(${marker._leaflet_id})">Delete</button>
+          <div style="text-align: center; padding: 5px;">
+            <b>Dropped Pin</b><br style="margin-bottom: 5px;">
+            Latitude: ${lat.toFixed(6)}<br style="margin-bottom: 5px;">
+            Longitude: ${lng.toFixed(6)}<br style="margin-bottom: 10px;">
+            <button style="padding: 5px 10px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer;" onclick="removeMarker(${
+              marker._leaflet_id
+            })">Delete</button>
+          </div>
         `;
 
         marker.bindPopup(popupContent).openPopup();
