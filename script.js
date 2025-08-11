@@ -158,7 +158,7 @@ function dropPinAtCurrentLocation() {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        const marker = L.marker([lat, lng], { draggable: false }).addTo(map);
 
         // Create popup content with lat/lng and delete button (correctly scoped here)
         const popupContent = `
