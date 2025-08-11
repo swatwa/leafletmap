@@ -6,9 +6,11 @@ const coords = urlParams.get("coords")?.split(",").map(Number);
 let userMarkers = []; // Array for manually dropped pins
 let liveLocationMarker; // To hold the single marker that tracks live location
 let watchId = null; // To store the ID returned by watchPosition, allowing us to stop tracking
+let isTrackingLive = false; // State variable for live tracking
 
-// Get references to UI elements (assuming these exist in your HTML)
+// Get references to UI elements
 const messageArea = document.getElementById("message-area");
+const liveTrackingButton = document.getElementById("liveTrackingButton");
 
 /**
  * Displays a temporary message on the map.
@@ -116,7 +118,7 @@ function startLiveLocationTracking() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        // const accuracy = position.coords.accuracy; // Simplified: removed accuracy circle
+        const accuracy = position.coords.accuracy; // Get accuracy for popup
 
         const latLng = [lat, lng];
 
@@ -125,13 +127,38 @@ function startLiveLocationTracking() {
           liveLocationMarker = L.marker(latLng, {
             icon: liveLocationIcon,
           }).addTo(map);
-          liveLocationMarker.bindPopup(`You are here`).openPopup(); // Simple popup
-          map.setView(latLng, 16); // Set map view on first fix
+          // Initial popup content including lat/lng and accuracy
+          liveLocationMarker
+            .bindPopup(
+              `          
+                        <span style="font-size: 1.5em;">Lat: ${lat.toFixed(
+                          6
+                        )}</span><br>
+                        <span style="font-size: 1.5em;">Lng: ${lng.toFixed(
+                          6
+                        )}</span><br>
+                         <span style="font-size: 1.5em;">Accuracy: ${accuracy.toFixed(
+                           0
+                         )}m</span>
+                    `
+            )
+            .openPopup();
+          map.setView(latLng, 18); // Set map view on first fix
         } else {
           // Update the existing marker's position
           liveLocationMarker.setLatLng(latLng);
-          // Update popup content if needed (optional for this simplified version)
-          // liveLocationMarker.getPopup().setContent(`You are here<br>Accuracy: ${accuracy.toFixed(0)}m`);
+          // Update popup content with new lat/lng and accuracy
+          liveLocationMarker.getPopup().setContent(`
+                        <span style="font-size: 1.5em;">Lat: ${lat.toFixed(
+                          6
+                        )}</span><br>
+                        <span style="font-size: 1.5em;">Lng: ${lng.toFixed(
+                          6
+                        )}</span><br>
+                         <span style="font-size: 1.5em;">Accuracy: ${accuracy.toFixed(
+                           0
+                         )}m</span>
+                    `);
         }
 
         // Always pan the map to keep the live marker centered
@@ -155,22 +182,25 @@ function startLiveLocationTracking() {
           errorMessage += " Location request timed out.";
         }
         displayMessage(errorMessage, 8000); // Display for longer on error
-        // In this "always-on" scenario, we don't necessarily stop tracking on error,
-        // but the error message provides feedback. If you want it to truly stop
-        // trying until a refresh, uncomment the line below.
-        // stopLiveLocationTracking();
+        // In this "button-controlled" scenario, an error should stop tracking and reset the button
+        stopLiveLocationTracking(); // Stop watching on error
       },
       watchOptions
     );
     displayMessage("Live location tracking started.", 3000);
+    isTrackingLive = true;
+    liveTrackingButton.textContent = "Stop Live Tracking"; // Update button text
+    liveTrackingButton.classList.add("active"); // Add 'active' class to make it red
   } else {
     displayMessage("Geolocation is not supported by your browser.", 5000);
+    isTrackingLive = false;
+    liveTrackingButton.textContent = "Start Live Tracking"; // Reset button text if not supported
+    liveTrackingButton.classList.remove("active"); // Ensure 'active' class is removed
   }
 }
 
 /**
  * Stops real-time location tracking and removes the live location marker.
- * (This function is kept for completeness, but won't be called directly by a button now)
  */
 function stopLiveLocationTracking() {
   if (watchId) {
@@ -182,6 +212,21 @@ function stopLiveLocationTracking() {
       liveLocationMarker = null; // Clear the marker object
     }
     displayMessage("Live location tracking stopped.", 3000);
+    isTrackingLive = false;
+    liveTrackingButton.textContent = "Start Live Tracking"; // Update button text
+    liveTrackingButton.classList.remove("active"); // Remove 'active' class to make it blue again
+  }
+}
+
+/**
+ * Toggles live location tracking on/off.
+ * This function is now directly called by the "Start/Stop Live Tracking" button.
+ */
+function toggleLiveLocationTracking() {
+  if (isTrackingLive) {
+    stopLiveLocationTracking();
+  } else {
+    startLiveLocationTracking();
   }
 }
 
@@ -204,19 +249,17 @@ function dropPinAtCurrentLocation() {
 
         const popupContent = `
                     <div style="text-align: center; padding: 5px;">
-                        <b>Dropped Pin</b><br style="margin-bottom: 5px;">
-                        Latitude: ${lat.toFixed(
+                       <div style="text-align: left">
+                        <span style="font-size: 1.5em;">Lat: ${lat.toFixed(
                           6
-                        )}<br style="margin-bottom: 5px;">
-                        Longitude: ${lng.toFixed(
-                          6
-                        )}<br style="margin-bottom: 10px;">
-                        <button style="padding: 5px 10px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer;"
-                                onclick="removeMarker(${
-                                  marker._leaflet_id
-                                })">Delete</button>
-                    </div>
-                `;
+                        )}</span><br style="margin-bottom: 5px;">
+                        <span style="font-size: 1.5em;">Lng: ${lng.toFixed(6)}
+                        </div>
+                        </span><br style="margin-bottom: 10px;">
+                        <button id="deletePinButton" onclick="removeMarker(${
+                          marker._leaflet_id
+                        })">Delete</button>                 
+                         </div>`;
 
         marker.bindPopup(popupContent).openPopup();
         userMarkers.push(marker); // Add to the array of user-dropped markers
@@ -251,5 +294,5 @@ window.removeMarker = function (id) {
   }
 };
 
-// Start live tracking automatically when the map is fully loaded
-map.on("load", startLiveLocationTracking);
+// Removed: map.on("load", startLiveLocationTracking);
+// Live tracking will now only start when the 'toggleLiveLocationTracking' button is clicked.

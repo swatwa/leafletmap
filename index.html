@@ -12,7 +12,7 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <!-- Leaflet Realtime Plugin (useful for external data streams) -->
+    <!-- ADD THIS LINE FOR LEAFLET REALTIME PLUGIN -->
     <script src="https://unpkg.com/leaflet.realtime@2.2.0/dist/leaflet-realtime.min.js"></script>
     <style>
       body,
@@ -20,37 +20,117 @@
         margin: 0;
         padding: 0;
         height: 100%;
+        overflow: hidden; /* Prevent body scroll */
+        font-family: "Inter", sans-serif; /* Consistent font */
       }
 
       #map {
         height: 100vh;
         width: 100%;
+        border-radius: 10px; /* Added for map aesthetic consistency */
       }
 
       .button-container {
         position: absolute;
-        bottom: 50px; /* Position the container at the vertical center */
-        left: 50%; /* Position the container at the horizontal center */
-        transform: translate(
-          -50%,
-          -50%
-        ); /* Adjust the container back by half its own width and height */
+        bottom: 50px; /* Adjusted to be closer to the bottom, customize as needed */
+        left: 50%;
+        transform: translateX(-50%); /* Only horizontal centering */
         z-index: 1000;
+        display: flex; /* Use flexbox for button layout */
+        flex-direction: column; /* Stack buttons vertically */
+        align-items: center; /* Center items horizontally within the column */
+        gap: 15px; /* Space between buttons */
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.9
+        ); /* Slightly transparent background */
+        padding: 15px 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
       button {
-        padding: 10px 15px;
-        font-size: 28px;
+        padding: 12px 25px; /* Adjusted padding */
+        font-size: 1.5rem; /* Responsive font size */
+        font-weight: 600; /* Bolder text */
         cursor: pointer;
         border: none;
-        border-radius: 5px;
-        background-color: #0078a8;
+        border-radius: 8px; /* Slightly more rounded */
+        background: linear-gradient(
+          145deg,
+          #0078a8,
+          #005f88
+        ); /* Gradient for modern look */
         color: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease; /* Smooth transitions */
+        letter-spacing: 0.5px; /* Slight letter spacing */
+        width: 100%; /* Make buttons take full width of container when stacked */
+        max-width: 290px; /* Optional: limit max width of individual buttons for aesthetics */
       }
 
       button:hover {
-        background-color: #005f88;
+        background: linear-gradient(
+          145deg,
+          #005f88,
+          #0078a8
+        ); /* Invert gradient on hover */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      button:active {
+        transform: translateY(0); /* Press effect */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Style for the live tracking button when active (red) */
+      button#liveTrackingButton.active {
+        background: linear-gradient(
+          145deg,
+          #e53935,
+          #b71c1c
+        ); /* Red gradient */
+      }
+
+      button#liveTrackingButton.active:hover {
+        background: linear-gradient(
+          145deg,
+          #b71c1c,
+          #e53935
+        ); /* Invert red gradient on hover */
+      }
+      button#deletePinButton {
+        background-color: #f44336 !important; /* Always red */
+        color: white !important; /* Ensure text is white */
+        background: #f44336 !important; /* Solid red background */
+      }
+      button#deletePinButton:hover {
+        background-color: #d32f2f !important; /* Slightly darker red on hover */
+        background: #d32f2f !important;
+      } /* Message display area */
+      #message-area {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1001;
+        background-color: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        text-align: center;
+        opacity: 0; /* Hidden by default */
+        transition: opacity 0.5s ease;
+        pointer-events: none; /* Allows clicks to pass through */
+        max-width: 90%;
+        word-wrap: break-word;
+      }
+
+      #message-area.visible {
+        opacity: 1;
       }
 
       /* Styles for the Zoom Control buttons */
@@ -60,27 +140,56 @@
         width: 60px !important; /* Increases button width */
         height: 60px !important; /* Increases button height */
         line-height: 60px !important; /* Centers the +/- vertically */
-        border-radius: 5px !important; /* Slightly more rounded corners */
+        border-radius: 10px !important; /* Slightly more rounded corners */
+        background-color: #fff !important; /* White background */
+        color: #0078a8 !important; /* Blue text */
+        border: 1px solid #ccc !important;
+      }
+      .leaflet-control-zoom-in:hover,
+      .leaflet-control-zoom-out:hover {
+        background-color: #f0f0f0 !important;
+        color: #005f88 !important;
       }
 
       /* Styles for the Layers Control box */
       .leaflet-control-layers {
-        font-size: 30px; /* Increases text size inside the control */
-        padding: 8px; /* Adds more padding around the content */
-        border-radius: 8px; /* Makes the control box more rounded */
+        font-size: 1.1rem; /* Increases text size inside the control */
+        padding: 10px; /* Adds more padding around the content */
+        border-radius: 10px; /* Makes the control box more rounded */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       }
 
       /* Adjust padding for individual layer items within the control */
       .leaflet-control-layers label {
-        padding: 6px 0; /* Adds vertical padding to each layer name */
+        padding: 8px 0; /* Adds vertical padding to each layer name */
+        cursor: pointer;
       }
 
-      /* Optional: Adjust position if controls become too large and overlap */
-      .leaflet-control-zoom {
-        margin-top: 15px; /* Adjust top margin if needed */
-      }
-      .leaflet-control-layers {
-        margin-right: 15px; /* Adjust right margin if needed */
+      /* Make map controls more accessible on mobile */
+      @media (max-width: 600px) {
+        .button-container {
+          flex-direction: column; /* Stack buttons vertically on small screens */
+          gap: 10px;
+          bottom: 15px;
+          padding: 10px 15px;
+          border-radius: 10px;
+        }
+        button {
+          width: 100%; /* Full width buttons */
+          font-size: 1rem;
+          padding: 10px 20px;
+        }
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out {
+          font-size: 32px !important;
+          width: 50px !important;
+          height: 50px !important;
+          line-height: 50px !important;
+        }
+        .leaflet-control-layers {
+          font-size: 1rem;
+          padding: 8px;
+        }
       }
     </style>
     <meta charset="UTF-8" />
@@ -89,10 +198,12 @@
   </head>
   <body>
     <div id="map"></div>
+    <div id="message-area"></div>
     <div class="button-container">
-      <button onclick="dropPinAtCurrentLocation()">
-        Drop Pin at Current Location
+      <button id="liveTrackingButton" onclick="toggleLiveLocationTracking()">
+        Start Live Tracking
       </button>
+      <button onclick="dropPinAtCurrentLocation()">Drop Pin</button>
     </div>
     <script src="script.js"></script>
   </body>
