@@ -32,7 +32,7 @@
 
       .button-container {
         position: absolute;
-        bottom: 50px; /* Adjusted to be closer to the bottom, customize as needed */
+        bottom: 20px; /* Adjusted to be closer to the bottom, customize as needed */
         left: 50%;
         transform: translateX(-50%); /* Only horizontal centering */
         z-index: 1000;
@@ -145,10 +145,18 @@
         color: #0078a8 !important; /* Blue text */
         border: 1px solid #ccc !important;
       }
+      .leaflet-control-zoom-in {
+        margin-bottom: 10px;
+        border: 1px solid #ccc !important;
+      }
       .leaflet-control-zoom-in:hover,
       .leaflet-control-zoom-out:hover {
         background-color: #f0f0f0 !important;
         color: #005f88 !important;
+      }
+      .leaflet-touch .leaflet-control-layers,
+      .leaflet-touch .leaflet-bar {
+        border: none;
       }
 
       /* Styles for the Layers Control box */
@@ -163,6 +171,7 @@
       .leaflet-control-layers label {
         padding: 8px 0; /* Adds vertical padding to each layer name */
         cursor: pointer;
+        border: none;
       }
 
       /* Make map controls more accessible on mobile */
@@ -189,6 +198,7 @@
         .leaflet-control-layers {
           font-size: 1rem;
           padding: 8px;
+          border: none;
         }
       }
     </style>
