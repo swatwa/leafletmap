@@ -6,11 +6,9 @@ const coords = urlParams.get("coords")?.split(",").map(Number);
 let userMarkers = []; // Array for manually dropped pins
 let liveLocationMarker; // To hold the single marker that tracks live location
 let watchId = null; // To store the ID returned by watchPosition, allowing us to stop tracking
-let isTrackingLive = false; // State variable for live tracking
 
 // Get references to UI elements (assuming these exist in your HTML)
 const messageArea = document.getElementById("message-area");
-const liveTrackingButton = document.getElementById("liveTrackingButton");
 
 /**
  * Displays a temporary message on the map.
@@ -139,12 +137,15 @@ function startLiveLocationTracking() {
         // Always pan the map to keep the live marker centered
         map.panTo(latLng);
 
-        // Send current live coordinates to parent iframe
-        window.parent.postMessage({ lat, lng }, "*");
+        // Send current live coordinates to parent iframe (if embedded)
+        // This check prevents errors if not in an iframe with a parent window
+        if (window.parent !== window) {
+          window.parent.postMessage({ lat, lng }, "*");
+        }
       },
       (error) => {
         console.error("Geolocation watch error:", error);
-        let errorMessage = `Geolocation error for live tracking: ${error.message}.`;
+        let errorMessage = `Geolocation error: ${error.message}.`;
         if (error.code === error.PERMISSION_DENIED) {
           errorMessage +=
             " Please allow location access for this site in your browser settings.";
@@ -154,25 +155,22 @@ function startLiveLocationTracking() {
           errorMessage += " Location request timed out.";
         }
         displayMessage(errorMessage, 8000); // Display for longer on error
-        stopLiveLocationTracking(); // Stop watching on error
+        // In this "always-on" scenario, we don't necessarily stop tracking on error,
+        // but the error message provides feedback. If you want it to truly stop
+        // trying until a refresh, uncomment the line below.
+        // stopLiveLocationTracking();
       },
       watchOptions
     );
     displayMessage("Live location tracking started.", 3000);
-    isTrackingLive = true;
-    liveTrackingButton.textContent = "Stop Live Tracking";
   } else {
-    displayMessage(
-      "Geolocation is not supported by your browser for live tracking.",
-      5000
-    );
-    isTrackingLive = false;
-    liveTrackingButton.textContent = "Start Live Tracking";
+    displayMessage("Geolocation is not supported by your browser.", 5000);
   }
 }
 
 /**
  * Stops real-time location tracking and removes the live location marker.
+ * (This function is kept for completeness, but won't be called directly by a button now)
  */
 function stopLiveLocationTracking() {
   if (watchId) {
@@ -184,19 +182,6 @@ function stopLiveLocationTracking() {
       liveLocationMarker = null; // Clear the marker object
     }
     displayMessage("Live location tracking stopped.", 3000);
-    isTrackingLive = false;
-    liveTrackingButton.textContent = "Start Live Tracking";
-  }
-}
-
-/**
- * Toggles live location tracking on/off.
- */
-function toggleLiveLocationTracking() {
-  if (isTrackingLive) {
-    stopLiveLocationTracking();
-  } else {
-    startLiveLocationTracking();
   }
 }
 
@@ -235,7 +220,11 @@ function dropPinAtCurrentLocation() {
 
         marker.bindPopup(popupContent).openPopup();
         userMarkers.push(marker); // Add to the array of user-dropped markers
-        window.parent.postMessage({ lat, lng }, "*");
+
+        // Send current live coordinates to parent iframe (if embedded)
+        if (window.parent !== window) {
+          window.parent.postMessage({ lat, lng }, "*");
+        }
         displayMessage("Pin dropped at current location.", 3000);
       },
       (error) => {
@@ -262,9 +251,5 @@ window.removeMarker = function (id) {
   }
 };
 
-// Start live tracking by default when map loads, but only if not already tracking (e.g., after refresh)
-map.on("load", () => {
-  if (!isTrackingLive) {
-    startLiveLocationTracking();
-  }
-});
+// Start live tracking automatically when the map is fully loaded
+map.on("load", startLiveLocationTracking);
