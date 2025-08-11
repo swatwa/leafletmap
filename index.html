@@ -50,6 +50,36 @@
       button:hover {
         background-color: #005f88;
       }
+
+      /* Styles for the Zoom Control buttons */
+      .leaflet-control-zoom-in,
+      .leaflet-control-zoom-out {
+        font-size: 40px !important; /* Makes the +/- symbols bigger */
+        width: 60px !important; /* Increases button width */
+        height: 60px !important; /* Increases button height */
+        line-height: 60px !important; /* Centers the +/- vertically */
+        border-radius: 5px !important; /* Slightly more rounded corners */
+      }
+
+      /* Styles for the Layers Control box */
+      .leaflet-control-layers {
+        font-size: 30px; /* Increases text size inside the control */
+        padding: 8px; /* Adds more padding around the content */
+        border-radius: 8px; /* Makes the control box more rounded */
+      }
+
+      /* Adjust padding for individual layer items within the control */
+      .leaflet-control-layers label {
+        padding: 6px 0; /* Adds vertical padding to each layer name */
+      }
+
+      /* Optional: Adjust position if controls become too large and overlap */
+      .leaflet-control-zoom {
+        margin-top: 15px; /* Adjust top margin if needed */
+      }
+      .leaflet-control-layers {
+        margin-right: 15px; /* Adjust right margin if needed */
+      }
     </style>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -62,6 +92,6 @@
         Drop Pin at Current Location
       </button>
     </div>
+    <script src="script.js"></script>
   </body>
 </html>
-<script src="script.js"></script>
