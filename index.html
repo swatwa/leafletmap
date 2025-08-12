@@ -27,7 +27,6 @@
       #map {
         height: 100vh;
         width: 100%;
-        border-radius: 10px; /* Added for map aesthetic consistency */
       }
 
       .button-container {
@@ -201,6 +200,30 @@
           border: none;
         }
       }
+
+      /* Message display area */
+      #message-area {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1001;
+        background-color: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 1.15rem; /* Increased font size for messages */
+        text-align: center;
+        opacity: 0; /* Hidden by default */
+        transition: opacity 0.5s ease;
+        pointer-events: none; /* Allows clicks to pass through */
+        max-width: 90%;
+        word-wrap: break-word;
+      }
+
+      #message-area.visible {
+        opacity: 1;
+      }
     </style>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -213,7 +236,7 @@
       <button id="liveTrackingButton" onclick="toggleLiveLocationTracking()">
         Start Live Tracking
       </button>
-      <button onclick="dropPinAtCurrentLocation()">Drop Pin</button>
+      <!-- <button onclick="dropPinAtCurrentLocation()">Drop Pin</button> -->
     </div>
     <script src="script.js"></script>
   </body>

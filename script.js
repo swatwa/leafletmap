@@ -129,16 +129,10 @@ function startLiveLocationTracking() {
           // Initial popup content including lat/lng and accuracy
           liveLocationMarker
             .bindPopup(
-              `          
-                        <span style="font-size: 1.5em;">Lat: ${lat.toFixed(
-                          6
-                        )}</span><br>
-                        <span style="font-size: 1.5em;">Lng: ${lng.toFixed(
-                          6
-                        )}</span><br>
-                         <span style="font-size: 1.5em;">Accuracy: ${accuracy.toFixed(
-                           0
-                         )}m</span>
+              `
+                        <span style="font-size: 1.7em;">Accuracy: ${accuracy.toFixed(
+                          0
+                        )}m</span>
                     `
             )
             .openPopup();
@@ -148,15 +142,9 @@ function startLiveLocationTracking() {
           liveLocationMarker.setLatLng(latLng);
           // Update popup content with new lat/lng and accuracy
           liveLocationMarker.getPopup().setContent(`
-                        <span style="font-size: 1.5em;">Lat: ${lat.toFixed(
-                          6
-                        )}</span><br>
-                        <span style="font-size: 1.5em;">Lng: ${lng.toFixed(
-                          6
-                        )}</span><br>
-                         <span style="font-size: 1.5em;">Accuracy: ${accuracy.toFixed(
-                           0
-                         )}m</span>
+                        <span style="font-size: 1.7em;">Accuracy: ${accuracy.toFixed(
+                          0
+                        )}m</span>
                     `);
         }
 
@@ -234,7 +222,7 @@ function toggleLiveLocationTracking() {
 /**
  * Drops a single, non-draggable, but deletable pin at the user's current location on button click.
  */
-function dropPinAtCurrentLocation() {
+/**function dropPinAtCurrentLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
