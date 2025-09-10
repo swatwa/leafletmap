@@ -37,6 +37,8 @@ const Imagery = L.tileLayer(
   }
 );
 
+startLiveLocationTracking();
+
 // Default center
 let center = [47.2529, -122.4443];
 if (coords && coords.length === 2) {
@@ -73,9 +75,9 @@ const customPinIcon = L.icon({
 // Define a custom icon for the LIVE tracking marker (optional, but good for distinction)
 const liveLocationIcon = L.icon({
   iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
   iconRetinaUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   iconSize: [25, 41],
@@ -130,10 +132,10 @@ function startLiveLocationTracking() {
           liveLocationMarker
             .bindPopup(
               `
-                        <span style="font-size: 1.7em;">Accuracy: ${accuracy.toFixed(
-                          0
-                        )}m</span>
-                    `
+        <span style="font-size: 1.7em;">Accuracy: ${(
+          accuracy * 3.28084
+        ).toFixed(0)}ft</span>
+    `
             )
             .openPopup();
           map.setView(latLng, 18); // Set map view on first fix
@@ -142,10 +144,10 @@ function startLiveLocationTracking() {
           liveLocationMarker.setLatLng(latLng);
           // Update popup content with new lat/lng and accuracy
           liveLocationMarker.getPopup().setContent(`
-                        <span style="font-size: 1.7em;">Accuracy: ${accuracy.toFixed(
-                          0
-                        )}m</span>
-                    `);
+    <span style="font-size: 1.7em;">Accuracy: ${(accuracy * 3.28084).toFixed(
+      0
+    )}ft</span>
+`);
         }
 
         // Always pan the map to keep the live marker centered
